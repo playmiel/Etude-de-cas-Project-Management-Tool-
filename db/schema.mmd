@@ -1,0 +1,59 @@
+erDiagram
+    USERS ||--o{ PROJECT_MEMBERS : "appartient"
+    PROJECTS ||--o{ PROJECT_MEMBERS : "reunit"
+    PROJECTS ||--o{ TASKS : "contient"
+    USERS ||--o{ TASKS : "assignee"
+    TASKS ||--o{ TASK_HISTORY : "trace"
+    USERS ||--o{ TASK_HISTORY : "auteur"
+    USERS ||--o{ NOTIFICATIONS : "destinataire"
+    TASKS ||--o{ NOTIFICATIONS : "concerne"
+
+    USERS {
+        bigint id PK
+        varchar username UK
+        varchar email UK
+        varchar password_hash
+        timestamp created_at
+    }
+    PROJECTS {
+        bigint id PK
+        varchar name
+        text description
+        date start_date
+        timestamp created_at
+    }
+    PROJECT_MEMBERS {
+        bigint id PK
+        bigint project_id FK
+        bigint user_id FK
+        varchar role "ADMIN|MEMBER|OBSERVER"
+        timestamp joined_at
+    }
+    TASKS {
+        bigint id PK
+        bigint project_id FK
+        varchar name
+        text description
+        date due_date
+        date end_date
+        varchar priority "LOW|MEDIUM|HIGH"
+        varchar status "TODO|IN_PROGRESS|DONE"
+        bigint assignee_id FK
+        timestamp created_at
+        timestamp updated_at
+    }
+    TASK_HISTORY {
+        bigint id PK
+        bigint task_id FK
+        bigint changed_by FK
+        varchar change_description
+        timestamp changed_at
+    }
+    NOTIFICATIONS {
+        bigint id PK
+        bigint recipient_id FK
+        bigint task_id FK
+        varchar message
+        boolean is_read
+        timestamp created_at
+    }

@@ -1,0 +1,15 @@
+# Backend (Maven)
+backend/target/
+
+# Frontend (Node / Angular)
+frontend/node_modules/
+frontend/dist/
+frontend/coverage/
+frontend/.angular/
+
+# Divers
+*.log
+.DS_Store
+.idea/
+*.iml
+.vscode/

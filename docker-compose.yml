@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: pmt-db
+    environment:
+      POSTGRES_DB: pmt
+      POSTGRES_USER: pmt
+      POSTGRES_PASSWORD: pmt
+    ports:
+      - "5432:5432"
+    volumes:
+      - pmt-db-data:/var/lib/postgresql/data
+      # Initialisation : structure puis donnees de test (executees au premier demarrage)
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./db/data.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pmt -d pmt"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    image: ${DOCKERHUB_USERNAME:-local}/pmt-backend:latest
+    container_name: pmt-backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/pmt
+      SPRING_DATASOURCE_USERNAME: pmt
+      SPRING_DATASOURCE_PASSWORD: pmt
+      JPA_DDL_AUTO: update
+      PMT_CORS_ALLOWED_ORIGINS: http://localhost:4200
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build: ./frontend
+    image: ${DOCKERHUB_USERNAME:-local}/pmt-frontend:latest
+    container_name: pmt-frontend
+    depends_on:
+      - backend
+    ports:
+      - "4200:80"
+
+volumes:
+  pmt-db-data:
